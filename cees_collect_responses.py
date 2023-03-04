@@ -6,6 +6,8 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.common.by import By
 import os
+from base64 import b64encode, b64decode
+
 
 output_directory = r"D:\git\CEES\output"
 # output_directory = r"C:\Users\Rohit Nimmala\Documents\cees\output"
@@ -16,6 +18,14 @@ next_response_xpath = "/html/body/div[2]/div/div/div/div/div[3]/div[1]/div[1]/di
 number_of_results_xpath = "/html/body/div[2]/div/div/div/div[2]/div[1]/div[2]/div/div/div[1]/div[2]/div[2]/div/div[1]/div[1]"
 login_button_xpath = "/html/body/section/div/div[2]/div/form/div[3]/div/button"
 view_results_button_xpath = "/html/body/div[2]/div/div/div/div[2]/div[1]/div[2]/div/div/div[1]/div[3]/button/div"
+
+
+def encode_password(input):
+    return b64encode(input)
+
+
+def decode_password(encoded_password):
+    return b64decode(encoded_password).decode()
 
 
 def wait_for_an_element(identifier, find_by=By.ID):
@@ -67,7 +77,7 @@ for index, form_url in enumerate(forms_list):
     date_collected = ""
     if index == 0:
         wait_for_an_element('username').send_keys('nimmalrt')
-        wait_for_an_element('password').send_keys('<password>')
+        wait_for_an_element('password').send_keys(decode_password(b'VGNzY3RzbTkh'))
         click_an_element(login_button_xpath, By.XPATH)
     number_of_results = wait_for_an_element(number_of_results_xpath, By.XPATH).text
     click_an_element(view_results_button_xpath, By.XPATH)
