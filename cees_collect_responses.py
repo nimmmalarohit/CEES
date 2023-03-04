@@ -1,5 +1,3 @@
-from datetime import datetime
-from time import sleep
 import json
 from selenium import webdriver
 from selenium.webdriver.support import expected_conditions as EC
@@ -49,7 +47,13 @@ def rename_file(student_name, date_collected):
         print(f"File already exists, skipped renaming the file {new_file}")
 
 
-start_date = datetime.now()
+def download_file():
+    student_name = wait_for_an_element(student_name_xpath, By.XPATH).text
+    date_collected = wait_for_an_element(date_collected_css_selector, By.CSS_SELECTOR).text
+    driver.execute_script('window.print();')
+    rename_file(student_name, date_collected)
+
+
 options = webdriver.ChromeOptions()
 settings = {
        "recentDestinations": [{
@@ -79,19 +83,13 @@ for index, form_url in enumerate(forms_list):
         wait_for_an_element('username').send_keys('nimmalrt')
         wait_for_an_element('password').send_keys(decode_password(b'VGNzY3RzbTkh'))
         click_an_element(login_button_xpath, By.XPATH)
-    number_of_results = wait_for_an_element(number_of_results_xpath, By.XPATH).text
+    number_of_results = int(wait_for_an_element(number_of_results_xpath, By.XPATH).text)
     click_an_element(view_results_button_xpath, By.XPATH)
-    student_name = wait_for_an_element(student_name_xpath, By.XPATH).text
-    date_collected = wait_for_an_element(date_collected_css_selector, By.CSS_SELECTOR).text
-    driver.execute_script('window.print();')
-    rename_file(student_name, date_collected)
+    download_file()
 
-    for i in range(int(number_of_results)-1):
-        click_an_element(next_response_xpath, By.XPATH)
-        student_name = wait_for_an_element(student_name_xpath, By.XPATH).text
-        date_collected = wait_for_an_element(date_collected_css_selector, By.CSS_SELECTOR).text
-        driver.execute_script('window.print();')
-        rename_file(student_name, date_collected)
+    if number_of_results > 1:
+        for i in range(number_of_results-1):
+            click_an_element(next_response_xpath, By.XPATH)
+            download_file()
 
-sleep(15)
 driver.close()
