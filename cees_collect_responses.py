@@ -1,4 +1,6 @@
 import json
+from time import sleep
+
 from selenium import webdriver
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.wait import WebDriverWait
@@ -15,8 +17,27 @@ next_response_xpath = "/html/body/div[2]/div/div/div/div/div[3]/div[1]/div[1]/di
 number_of_results_xpath = "/html/body/div[2]/div/div/div/div[2]/div[1]/div[2]/div/div/div[1]/div[2]/div[2]/div/div[1]/div[1]"
 login_button_xpath = "/html/body/section/div/div[2]/div/form/div[3]/div/button"
 view_results_button_xpath = "/html/body/div[2]/div/div/div/div[2]/div[1]/div[2]/div/div/div[1]/div[3]/button"
-site_name_xpath = "/html/body/div[2]/div/div/div/div[2]/div[1]/div[2]/div/div/div[1]/div[2]/div"
 
+
+def get_number_of_responses(driver):
+    return driver.execute_script("""
+    var responses = Number(document.evaluate('/html/body/div[2]/div/div/div/div[*]/div[1]/div[2]/div/div/div[1]/div[2]/div[2]/div/div[1]/div[1]', document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue.innerHTML);
+    return responses
+    """)
+
+
+def get_form_name(driver):
+    return driver.execute_script("""
+    var path = "/html/body/div[2]/div/div/div/div[*]/div[1]/div[2]/div/div/div[1]/div[2]/div";
+    return document.evaluate(path, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue.innerHTML;
+    """)
+
+
+def click_view_responses(driver):
+    return driver.execute_script("""
+    var path = "/html/body/div[2]/div/div/div/div[*]/div[1]/div[2]/div/div/div[1]/div[3]/button";
+    document.evaluate(path, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue.click();
+    """)
 
 def encode_password(input):
     return b64encode(input)
@@ -51,7 +72,7 @@ def rename_file(student_name, date_collected):
         print(f"File already exists, skipped renaming the file {new_file}")
 
 
-def download_file(site_name):
+def download_file(site_name, response_number):
     student_name = wait_for_an_element(student_name_xpath, By.XPATH, wait_time=10, is_blocker=False)
     date_collected = wait_for_an_element(date_collected_css_selector, By.CSS_SELECTOR, wait_time=10, is_blocker=False)
     if student_name and date_collected:
@@ -60,7 +81,12 @@ def download_file(site_name):
         driver.execute_script('window.print();')
         rename_file(student_name, date_collected)
     else:
-        print(f"Unable to download the file, as student name or date field is not present for the response in the form: {site_name}")
+        print(f"Student name or date field is not present for the response in the form: {site_name}")
+        new_file_name = site_name.replace(' ', '_') + '_' + str(response_number)
+        print(f"downloading with the file name: {new_file_name}")
+        driver.execute_script('window.print();')
+        rename_file(new_file_name, "")
+
 
 
 options = webdriver.ChromeOptions()
@@ -81,8 +107,8 @@ options.add_argument(r'--kiosk-printing')
 driver = webdriver.Chrome(r'C:\Users\Rohit\Downloads\chromedriver.exe', options=options)
 
 forms_list = [
-    # "https://forms.office.com/pages/designpagev2.aspx?lang=en-US&origin=OfficeDotCom&route=Start&subpage=design&id=bC4i9cZf60iPA3PbGCA7YyvECyWnxklDhRUp86g5d0NUNjNPWlBPS1ZNWTI0RklCU0NQNVpLTFg5Uy4u&analysis=true",
-    # "https://forms.office.com/Pages/DesignPageV2.aspx?origin=NeoPortalPage&subpage=design&id=bC4i9cZf60iPA3PbGCA7YwFk15odqZZBk0nbS_TJHypUQkFKN09TMVNOSVJLVjQzME9WRFM3N0xLRS4u&analysis=true",
+    "https://forms.office.com/pages/designpagev2.aspx?lang=en-US&origin=OfficeDotCom&route=Start&subpage=design&id=bC4i9cZf60iPA3PbGCA7YyvECyWnxklDhRUp86g5d0NUNjNPWlBPS1ZNWTI0RklCU0NQNVpLTFg5Uy4u&analysis=true",
+    "https://forms.office.com/Pages/DesignPageV2.aspx?origin=NeoPortalPage&subpage=design&id=bC4i9cZf60iPA3PbGCA7YwFk15odqZZBk0nbS_TJHypUQkFKN09TMVNOSVJLVjQzME9WRFM3N0xLRS4u&analysis=true",
     "https://forms.office.com/Pages/DesignPageV2.aspx?origin=NeoPortalPage&subpage=design&id=bC4i9cZf60iPA3PbGCA7YwFk15odqZZBk0nbS_TJHypUNFU5Q1ZQVjRHUzJDWlMySDU3Rjg3VU85Vy4u&analysis=true"
 ]
 
@@ -94,17 +120,20 @@ for index, form_url in enumerate(forms_list):
         wait_for_an_element('username').send_keys('nimmalrt')
         wait_for_an_element('password').send_keys(decode_password(b'VGNzY3RzbTkh'))
         click_an_element(login_button_xpath, By.XPATH)
-    number_of_results = int(wait_for_an_element(number_of_results_xpath, By.XPATH, wait_time=15).text)
-    site_name = wait_for_an_element(site_name_xpath, By.XPATH, wait_time=10, is_blocker=False).text
+        print("Sleeping for 30 seconds.")
+        sleep(20)
+    sleep(10)
+    number_of_results = get_number_of_responses(driver)
+    site_name = get_form_name(driver)
 
     if number_of_results > 0:
         print(f"Processing for the form: {site_name}, number of responses: {number_of_results}")
-        click_an_element(view_results_button_xpath, By.XPATH, wait_time=10, is_blocker=False)
-        download_file(site_name)
+        click_view_responses(driver)
+        download_file(site_name, 0)
 
     if number_of_results > 1:
         for i in range(number_of_results-1):
             click_an_element(next_response_xpath, By.XPATH)
-            download_file(site_name)
+            download_file(site_name, i+1)
 
 driver.close()
