@@ -7,6 +7,7 @@ from selenium.webdriver.common.by import By
 import os
 from base64 import b64encode, b64decode
 from datetime import datetime, date as dt
+import pandas as pd
 
 
 output_directory = r"C:\Users\Rohit Nimmala\Documents\cees\output"
@@ -17,6 +18,45 @@ number_of_results_xpath = "/html/body/div[2]/div/div/div/div[2]/div[1]/div[2]/di
 login_button_xpath = "/html/body/section/div/div[2]/div/form/div[3]/div/button"
 view_results_button_xpath = "/html/body/div[2]/div/div/div/div[2]/div[1]/div[2]/div/div/div[1]/div[3]/button"
 current_days_data = []
+roster = pd.read_csv("students.csv")
+report_date = dt.today()
+# report_date = datetime(2023, 3, 6).date() #use for adhoc run
+
+
+def student_filter_query(input_dataframe, name):
+    return input_dataframe[input_dataframe['Name'].str.contains(name.replace('’','\'').capitalize())]
+
+
+def get_student_details(students_dataframe, student_name):
+    row: pd.DataFrame = student_filter_query(students_dataframe, student_name)
+    if not row.empty:
+        student_name = row.iloc[0]['Name']
+        school_name = row.iloc[0]['School']
+        return student_name, school_name
+    else:
+        print(f"Unable to find the student name: {student_name} in the dataframe.")
+        return None, None
+
+
+def missing_data_html(input_date, present_day_data, students_roster: pd.DataFrame):
+    output_html = ""
+    present_student_forms = []
+    current_week_day = input_date.strftime('%A')
+    roster = students_roster[students_roster['Day'] == current_week_day]
+    for student_name, site_name, inp_date, school_name in present_day_data:
+        present_student_forms.append(student_name)
+    missing_forms_df = roster[~roster['Name'].isin(present_student_forms)]
+    for index, row in missing_forms_df.iterrows():
+        output_html += f"""
+        <tr>
+            <td>{row['Name']}</td>
+            <td>{""}</td>
+            <td>{input_date}</td>
+            <td>{row['School']}</td>
+            <td class="no">No</td>
+        </tr>
+        """
+    return output_html
 
 
 def html_generator(data):
@@ -55,13 +95,14 @@ def html_generator(data):
     </style>
     </head>
     """
-    table_content = ""
-    for student_name, site_name, input_date in data:
-        table_content = table_content + f"""
+    filled_data = ""
+    for student_name, site_name, input_date, school_name in data:
+        filled_data = filled_data + f"""
         <tr>
             <td>{student_name}</td>
             <td>{site_name}</td>
             <td>{input_date}</td>
+            <td>{school_name}</td>
             <td class="yes">Yes</td>
         </tr>
         """
@@ -71,18 +112,20 @@ def html_generator(data):
     <html>
     {html_head}
     <body>
-        <h1>Data Collection Report</h1>
+        <h1>Data Collection Report for : {str(report_date)}</h1>
         <table>
             <thead>
                 <tr>
                     <th>Name</th>
-                    <th>Location</th>
+                    <th>Internship</th>
                     <th>Date</th>
+                    <th>School Name</th>
                     <th>Filled</th>
                 </tr>
             </thead>
             <tbody>
-            {table_content}				
+            {filled_data}
+            {missing_data_html(report_date, current_days_data, roster)}				
             </tbody>
         </table>
     </body>
@@ -91,12 +134,16 @@ def html_generator(data):
     return html_string
 
 
-def store_current_day_data(student_name, site_name, input_date):
-    current_date = dt.today()
-    # current_date = dt(2023, 3, 6)
+def store_current_day_data(student_dataframe, student_name, site_name, input_date):
     input_date = datetime.strptime(input_date, '%m/%d/%Y').date()
-    if input_date == current_date:
-        current_days_data.append([student_name, site_name, str(input_date)])
+    current_week_day = input_date.strftime('%A')
+    roster = student_dataframe[student_dataframe['Day'] == current_week_day]
+    _student_name, _school_name = get_student_details(roster, student_name)
+    student_name = _student_name if _student_name else student_name
+    school_name = _school_name if _school_name else ""
+
+    if input_date == report_date:
+        current_days_data.append([student_name, site_name, str(input_date), school_name])
         print(f"Today's record found for student_name: {student_name} , site_name: {site_name}, input_date: {str(input_date)}")
 
 
@@ -192,6 +239,7 @@ def click_an_element(identifier, find_by=By.ID, wait_time=900, is_blocker=True):
 def rename_file(student_name, date_collected):
     new_file = fr'{output_directory}\{student_name}_{date_collected.replace(r"/","-")}.pdf'
     if not os.path.isfile(new_file):
+        sleep(0.3)
         os.rename(fr'{output_directory}\{default_file_name}', new_file)
     else:
         print(f"File already exists, skipped renaming the file {new_file}")
@@ -209,7 +257,7 @@ def download_file(site_name, response_number):
         driver.execute_script('window.print();')
         rename_file(student_name, date_collected + '_' + site_name.replace(' ', '_'))
         print("Downloaded the file")
-        store_current_day_data(student_name, site_name, date_collected)
+        store_current_day_data(roster, student_name, site_name, date_collected)
     else:
         print(f"Student name or date field is not present for the response in the form: {site_name}")
         new_file_name = site_name.replace(' ', '_') + '_' + str(response_number)
@@ -232,7 +280,7 @@ settings = {
     }
 prefs = {'printing.print_preview_sticky_settings.appState': json.dumps(settings), 'savefile.default_directory': f'{output_directory}'}
 options.add_experimental_option('prefs', prefs)
-options.add_argument(r'C:\Users\Rohit Nimmala\AppData\Local\Google\Chrome\User Data')
+# options.add_argument(r'C:\Users\Rohit Nimmala\AppData\Local\Google\Chrome\User Data')
 options.add_argument(r'--kiosk-printing')
 
 driver = webdriver.Chrome(r'C:\Users\Rohit\Downloads\chromedriver.exe', options=options)
@@ -284,7 +332,7 @@ for index, form_url in enumerate(forms_list):
 
     if number_of_results:
         if number_of_results > 0:
-            print(f"Processing for the form: {site_name}, number of responses: {number_of_results}")
+            print(f"Processing for the form: {site_name}, number of responses: {number_of_results} and index: {index}")
             click_view_responses(driver)
             download_file(site_name, 0)
         else:
@@ -303,5 +351,5 @@ print("printing current days data:")
 print(current_days_data)
 
 email_html = html_generator(current_days_data)
-with open(output_directory + '/' + 'data_collection_report_' + str(datetime.today().date()) + '.html', 'w') as email_file:
+with open(output_directory + '/' + 'data_collection_report_' + str(report_date) + '.html', 'w') as email_file:
     email_file.write(email_html)
