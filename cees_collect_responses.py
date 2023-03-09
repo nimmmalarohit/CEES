@@ -20,7 +20,7 @@ view_results_button_xpath = "/html/body/div[2]/div/div/div/div[2]/div[1]/div[2]/
 current_days_data = []
 roster = pd.read_csv("students.csv")
 report_date = dt.today()
-# report_date = datetime(2023, 3, 6).date() #use for adhoc run
+# report_date = datetime(2023, 3, 7).date() #use for adhoc run
 
 
 def student_filter_query(input_dataframe, name):
@@ -139,6 +139,8 @@ def store_current_day_data(student_dataframe, student_name, site_name, input_dat
     current_week_day = input_date.strftime('%A')
     roster = student_dataframe[student_dataframe['Day'] == current_week_day]
     _student_name, _school_name = get_student_details(roster, student_name)
+    if not _student_name:
+        _student_name, _school_name = get_student_details(roster, student_name.split(' ')[0])
     student_name = _student_name if _student_name else student_name
     school_name = _school_name if _school_name else ""
 
@@ -245,19 +247,29 @@ def rename_file(student_name, date_collected):
         print(f"File already exists, skipped renaming the file {new_file}")
 
 
+def check_if_file_exists(student_name, date_collected):
+    new_file = fr'{output_directory}\{student_name}_{date_collected.replace(r"/", "-")}.pdf'
+    return os.path.isfile(new_file)
+
+
 def download_file(site_name, response_number):
     response_number = response_number + 1
     print(f"trying to download the file: {site_name} and response {response_number}")
-    student_name = wait_for_an_element(student_name_xpath, By.XPATH, wait_time=5, is_blocker=False)
+    student_name = wait_for_an_element(student_name_xpath, By.XPATH, wait_time=3, is_blocker=False)
     if student_name and 'Student Name' in student_name.text:
-        student_name = wait_for_an_element(student_name_xpath2, By.XPATH, wait_time=5, is_blocker=False)
+        student_name = wait_for_an_element(student_name_xpath2, By.XPATH, wait_time=3, is_blocker=False)
     date_collected = get_input_date(driver)
     if student_name and date_collected:
         student_name = student_name.text
-        driver.execute_script('window.print();')
-        rename_file(student_name, date_collected + '_' + site_name.replace(' ', '_'))
-        print("Downloaded the file")
+        new_file_list = [student_name, date_collected + '_' + site_name.replace(' ', '_')]
         store_current_day_data(roster, student_name, site_name, date_collected)
+        if not check_if_file_exists(new_file_list[0], new_file_list[1]):
+            driver.execute_script('window.print();')
+            sleep(0.3)
+            rename_file(new_file_list[0], new_file_list[1])
+            print("Downloaded the file")
+        else:
+            print("file already exists, skipping to save.")
     else:
         print(f"Student name or date field is not present for the response in the form: {site_name}")
         new_file_name = site_name.replace(' ', '_') + '_' + str(response_number)
@@ -313,7 +325,8 @@ forms_list = [
     "https://forms.office.com/Pages/DesignPageV2.aspx?origin=NeoPortalPage&subpage=design&collectionid=ci0npmuziej4ua0lscxuny&id=bC4i9cZf60iPA3PbGCA7YyvECyWnxklDhRUp86g5d0NUNzBSMldPSkg1UTg4V1dFUDI5TldMQUZWMS4u&analysis=true",
     "https://forms.office.com/Pages/DesignPageV2.aspx?origin=NeoPortalPage&subpage=design&collectionid=ci0npmuziej4ua0lscxuny&id=bC4i9cZf60iPA3PbGCA7YyvECyWnxklDhRUp86g5d0NUM1pHSzVDNjBORlk1NEQ5U0laUTZWN0tZWC4u&analysis=true",
     "https://forms.office.com/Pages/DesignPageV2.aspx?origin=NeoPortalPage&subpage=design&collectionid=ci0npmuziej4ua0lscxuny&id=bC4i9cZf60iPA3PbGCA7YyvECyWnxklDhRUp86g5d0NUQVNDRzJENDhCTzVISjdVMUFZREhXRTcxRS4u&analysis=true",
-    "https://forms.office.com/Pages/DesignPageV2.aspx?origin=NeoPortalPage&subpage=design&collectionid=ci0npmuziej4ua0lscxuny&id=bC4i9cZf60iPA3PbGCA7YyvECyWnxklDhRUp86g5d0NUNjNPWlBPS1ZNWTI0RklCU0NQNVpLTFg5Uy4u&analysis=true"
+    "https://forms.office.com/Pages/DesignPageV2.aspx?origin=NeoPortalPage&subpage=design&collectionid=ci0npmuziej4ua0lscxuny&id=bC4i9cZf60iPA3PbGCA7YyvECyWnxklDhRUp86g5d0NUNjNPWlBPS1ZNWTI0RklCU0NQNVpLTFg5Uy4u&analysis=true",
+    "https://forms.office.com/Pages/DesignPageV2.aspx?origin=NeoPortalPage&subpage=design&collectionid=ci0npmuziej4ua0lscxuny&id=bC4i9cZf60iPA3PbGCA7YyvECyWnxklDhRUp86g5d0NUMDM5VTFFT1FUMjlNMFZMQUNaTEJZMEFXRy4u&analysis=true"
 ]
 
 for index, form_url in enumerate(forms_list):
@@ -344,7 +357,7 @@ for index, form_url in enumerate(forms_list):
                 download_file(site_name, i+1)
         print(f"Completed saving responses from the form: {site_name}")
     else:
-        print(f"Unsuccessful in capturing number of responses for the site : {site_name} and responses values: {number_of_results}")
+        print(f"Unsuccessful in capturing number of responses for the site : {site_name} and responses values: {number_of_results}, and index: {index}")
 
 driver.close()
 print("printing current days data:")
