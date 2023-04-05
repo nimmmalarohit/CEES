@@ -8,9 +8,10 @@ import os
 from base64 import b64encode, b64decode
 from datetime import datetime, date as dt
 import pandas as pd
+import pathlib
 
 
-output_directory = r"C:\Users\Rohit Nimmala\Documents\cees\output"
+output_directory = f"{pathlib.Path(__file__).parent.resolve()}\output"
 default_file_name = "Microsoft Forms.pdf"
 student_name_xpath = "/html/body/div[2]/div/div/div/div/div[3]/div[1]/div[2]/div[1]/div[*]/div[2]/div/div"
 student_name_xpath2 = "/html/body/div[2]/div/div/div/div/div[3]/div[1]/div[2]/div[1]/div[*]/div[2]/div/div[2]/div/div"
