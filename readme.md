@@ -120,5 +120,5 @@ pwd
 #### 2. If everything is set up properly, now a Chrome browser should open and should prompt for email address, type in your UC email address associated with microsoft forms and click Next.
 #### 3. Script fills in username (6+2) and password automatically, when it navigates to next page, if you see and prompt of click on "stay signed in", click it. From here automation starts.
 * Note: Do not use other applications until the script finishes, as it might slowdown the script.
-#### 4. wait for the script to load all pages sequentially and download the responses to the output folder present in the project directory (where we set up the project in step 4)
+#### 4. wait for the script to load all pages sequentially and download the responses in PDF format to the output folder present in the project directory (where we set up the project in step 4)
 #### 5. A html file with the name `data_collection_report_<current_date>` is generated in the output directory, which has data of each student for the present date, if data is filled - indicates YES in green, else indicates NO in Red
