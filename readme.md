@@ -1,4 +1,4 @@
-#### If the environment and project is set up already you may skip to `Running the script` section directly. 
+#### If the environment and project is set up already you may skip to [Running the script](#Running-the-script) section directly. 
 
 #### Note: To be able to run this script, you will need to have access to all the forms mentioned below (Each url corresponds to a Data collection form):
 
