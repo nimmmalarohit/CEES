@@ -65,7 +65,7 @@ Mac:
 https://www.educative.io/answers/how-to-add-python-to-the-path-variable-in-mac
 ```
 
-### 3. Install Git visiting below link (Complete the setup with default settings).
+### 3. Install Git: Visit below link (Complete the setup with default settings).
 
 ``` buildoutcfg
 https://git-scm.com/downloads
@@ -90,7 +90,7 @@ pip install pandas
 * Windows:
   #### open the created directory and click on Git bash here
 
-#### 3. Import the project from GIT, execute below command in the terminal when we opened in step 2. Note: Do not close the terminal after you are done with below commands.
+#### 3. Import the project from GIT, execute below command in the terminal which we opened in step 2. Note: Do not close the terminal after you are done with below commands.
 ```
 git clone https://github.com/nimmmalarohit/CEES.git
 cd CEES
