@@ -106,18 +106,19 @@ pwd
 * Once it completes, a file with the name encoded_password_file.txt is generated, open the file in any text editor and copy the encoded password.
 
 #### 6. Setup credentials in script.
-* Navigate to the location generated in step 4 and open the file cees_student_allocation.py with any text editor and replace below:
+* Navigate to the location generated in step 4 and open the `cees_collect_responses.py` file with any text editor and replace below:
   * find the text `'your 6+2 id here'` and replace it with your 6+2 id.
-  * find the text `b'your encoded password here'` and replace the encoded password generated in step 5
+  * find the text `b'your encoded password here'` and replace it with the encoded password generated in step 5
 
-#### 7. Change the `student.csv` file (Present in location generated in step 4) if we have a change in list of students. 
+#### 7. (optional) Change the `student.csv` file (Present in location generated in step 4) if we have a change in list of students. 
 
 # Running the script
 #### (Optional) If you want to run the script for some other day other than current date  
-* find the line `report_date = dt.today()` comment it.
+* find the line `report_date = dt.today()` comment it (add a # at the beginning of the line to comment).
 * uncomment the next line which says `#use for adhoc run` and edit the date in `datetime(year, month, day)` format
-#### 1. double-click on run_on_mac if Mac, and run_on_Windows file if on Windows.
-#### 2. If everything is set up properly, now a Chrome browser should open and prompt for email address, type in your UC email address associated with microsoft forms and click Next.
-#### 3. Script fills in username (6+2) and password automatically, when it navigates to next page, if you see and prompt of click on "stay signed in", click it and here our job ends.
-#### 4. wait for the script to load all pages sequentially and download all the responses to the output folder present in the project directory (where we set up the project in step 4)
-#### 5. A html file with the name `data_collection_report_<current_date>` is generated in the output directory, which has data of each student for the present date, if data is filled, indicates YES in green, else indicates NO in Red
+#### 1. double-click on run_on_mac if Mac, or run_on_Windows file if on Windows.
+#### 2. If everything is set up properly, now a Chrome browser should open and should prompt for email address, type in your UC email address associated with microsoft forms and click Next.
+#### 3. Script fills in username (6+2) and password automatically, when it navigates to next page, if you see and prompt of click on "stay signed in", click it. From here automation starts.
+* Note: Do not use other application until the script finishes, as it might slowdown the script.
+#### 4. wait for the script to load all pages sequentially and download the responses to the output folder present in the project directory (where we set up the project in step 4)
+#### 5. A html file with the name `data_collection_report_<current_date>` is generated in the output directory, which has data of each student for the present date, if data is filled - indicates YES in green, else indicates NO in Red
