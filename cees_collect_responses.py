@@ -20,7 +20,7 @@ view_results_button_xpath = "/html/body/div[2]/div/div/div/div[2]/div[1]/div[2]/
 current_days_data = []
 roster = pd.read_csv("students.csv")
 report_date = dt.today()
-# report_date = datetime(2023, 3, 7).date() #use for adhoc run
+# report_date = datetime(2023, 3, 30).date() #use for adhoc run
 
 
 def student_filter_query(input_dataframe, name):
@@ -247,6 +247,11 @@ def rename_file(student_name, date_collected):
         print(f"File already exists, skipped renaming the file {new_file}")
 
 
+def cleanup():
+    file = fr'{output_directory}\{default_file_name}'
+    if os.path.isfile(file):
+        os.remove(file)
+
 def check_if_file_exists(student_name, date_collected):
     new_file = fr'{output_directory}\{student_name}_{date_collected.replace(r"/", "-")}.pdf'
     return os.path.isfile(new_file)
@@ -256,10 +261,11 @@ def download_file(site_name, response_number):
     response_number = response_number + 1
     print(f"trying to download the file: {site_name} and response {response_number}")
     student_name = wait_for_an_element(student_name_xpath, By.XPATH, wait_time=3, is_blocker=False)
-    if student_name and 'Student Name' in student_name.text:
+    if student_name and 'Student' in student_name.text:
         student_name = wait_for_an_element(student_name_xpath2, By.XPATH, wait_time=3, is_blocker=False)
     date_collected = get_input_date(driver)
     if student_name and date_collected:
+        cleanup()
         student_name = student_name.text
         new_file_list = [student_name, date_collected + '_' + site_name.replace(' ', '_')]
         store_current_day_data(roster, student_name, site_name, date_collected)
@@ -326,8 +332,22 @@ forms_list = [
     "https://forms.office.com/Pages/DesignPageV2.aspx?origin=NeoPortalPage&subpage=design&collectionid=ci0npmuziej4ua0lscxuny&id=bC4i9cZf60iPA3PbGCA7YyvECyWnxklDhRUp86g5d0NUM1pHSzVDNjBORlk1NEQ5U0laUTZWN0tZWC4u&analysis=true",
     "https://forms.office.com/Pages/DesignPageV2.aspx?origin=NeoPortalPage&subpage=design&collectionid=ci0npmuziej4ua0lscxuny&id=bC4i9cZf60iPA3PbGCA7YyvECyWnxklDhRUp86g5d0NUQVNDRzJENDhCTzVISjdVMUFZREhXRTcxRS4u&analysis=true",
     "https://forms.office.com/Pages/DesignPageV2.aspx?origin=NeoPortalPage&subpage=design&collectionid=ci0npmuziej4ua0lscxuny&id=bC4i9cZf60iPA3PbGCA7YyvECyWnxklDhRUp86g5d0NUNjNPWlBPS1ZNWTI0RklCU0NQNVpLTFg5Uy4u&analysis=true",
-    "https://forms.office.com/Pages/DesignPageV2.aspx?origin=NeoPortalPage&subpage=design&collectionid=ci0npmuziej4ua0lscxuny&id=bC4i9cZf60iPA3PbGCA7YyvECyWnxklDhRUp86g5d0NUMDM5VTFFT1FUMjlNMFZMQUNaTEJZMEFXRy4u&analysis=true"
+    "https://forms.office.com/Pages/DesignPageV2.aspx?origin=NeoPortalPage&subpage=design&collectionid=ci0npmuziej4ua0lscxuny&id=bC4i9cZf60iPA3PbGCA7YyvECyWnxklDhRUp86g5d0NUMDM5VTFFT1FUMjlNMFZMQUNaTEJZMEFXRy4u&analysis=true",
+    "https://forms.office.com/Pages/DesignPageV2.aspx?origin=NeoPortalPage&subpage=design&collectionid=ci0npmuziej4ua0lscxuny&id=bC4i9cZf60iPA3PbGCA7YyvECyWnxklDhRUp86g5d0NUMlgxR0JGWkFXUTcwMFM4TFY2QlpHS1E4Ri4u&analysis=true",
+    "https://forms.office.com/Pages/DesignPageV2.aspx?origin=NeoPortalPage&subpage=design&collectionid=ci0npmuziej4ua0lscxuny&id=bC4i9cZf60iPA3PbGCA7YyvECyWnxklDhRUp86g5d0NUNkU5R1hPU1VBQ1pMNVRaMDhaNDNOVzdFVi4u&analysis=true",
+    "https://forms.office.com/Pages/DesignPageV2.aspx?origin=NeoPortalPage&subpage=design&collectionid=ci0npmuziej4ua0lscxuny&id=bC4i9cZf60iPA3PbGCA7YyvECyWnxklDhRUp86g5d0NUM1pHSzVDNjBORlk1NEQ5U0laUTZWN0tZWC4u&analysis=true",
+    "https://forms.office.com/Pages/DesignPageV2.aspx?origin=NeoPortalPage&subpage=design&id=bC4i9cZf60iPA3PbGCA7YwFk15odqZZBk0nbS_TJHypURUJTMUY1WVNKUFM5NldTN1RIMEZHV1NSVy4u&analysis=true",
+    "https://forms.office.com/Pages/DesignPageV2.aspx?origin=NeoPortalPage&subpage=design&collectionid=ci0npmuziej4ua0lscxuny&id=bC4i9cZf60iPA3PbGCA7YyvECyWnxklDhRUp86g5d0NUNjNPWlBPS1ZNWTI0RklCU0NQNVpLTFg5Uy4u&analysis=true",
+    "https://forms.office.com/Pages/DesignPageV2.aspx?origin=NeoPortalPage&subpage=design&id=bC4i9cZf60iPA3PbGCA7YwFk15odqZZBk0nbS_TJHypUOVBMMDZRNEREMU5GWVczUVdUU0EzS0M4Si4u&analysis=true",
+    "https://forms.office.com/Pages/DesignPageV2.aspx?origin=NeoPortalPage&subpage=design&id=bC4i9cZf60iPA3PbGCA7YwFk15odqZZBk0nbS_TJHypUMEdNQ1U3M1RVUzJOQzRBSFNCOTA3S0RSQi4u&analysis=true",
+    "https://forms.office.com/Pages/DesignPageV2.aspx?origin=NeoPortalPage&subpage=design&id=bC4i9cZf60iPA3PbGCA7YwFk15odqZZBk0nbS_TJHypUNUdPNjNRSFlMQzIxNDRRTEg4MEwwQTFMQS4u&analysis=true",
+    "https://forms.office.com/Pages/DesignPageV2.aspx?origin=NeoPortalPage&subpage=design&id=bC4i9cZf60iPA3PbGCA7YwFk15odqZZBk0nbS_TJHypUQk9ESU1OSVFMRU42NDE2VjVHME5aU1EwUS4u&analysis=true",
+    "https://forms.office.com/Pages/DesignPageV2.aspx?origin=NeoPortalPage&subpage=design&id=bC4i9cZf60iPA3PbGCA7YwFk15odqZZBk0nbS_TJHypUQVBBQTYzMzlINlBWVUVMOTVGVjFPUDBNNy4u&analysis=true",
+    "https://forms.office.com/Pages/DesignPageV2.aspx?origin=NeoPortalPage&subpage=design&id=bC4i9cZf60iPA3PbGCA7YwFk15odqZZBk0nbS_TJHypUM0RINU5FOUdZVzZTNEFFVTYzWDY1TlFNUS4u&analysis=true",
+    "https://forms.office.com/Pages/DesignPageV2.aspx?origin=NeoPortalPage&subpage=design&id=bC4i9cZf60iPA3PbGCA7YwFk15odqZZBk0nbS_TJHypUOUFZM1VaRkg3QlUwVE01NzJSSDMxWUxJRi4u&analysis=true"
 ]
+
+forms_list = list(set(forms_list))
 
 for index, form_url in enumerate(forms_list):
     driver.get(form_url)
