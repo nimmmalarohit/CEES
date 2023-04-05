@@ -299,10 +299,10 @@ settings = {
     }
 prefs = {'printing.print_preview_sticky_settings.appState': json.dumps(settings), 'savefile.default_directory': f'{output_directory}'}
 options.add_experimental_option('prefs', prefs)
-# options.add_argument(r'C:\Users\Rohit Nimmala\AppData\Local\Google\Chrome\User Data')
 options.add_argument(r'--kiosk-printing')
 
-driver = webdriver.Chrome(r'C:\Users\Rohit\Downloads\chromedriver.exe', options=options)
+# driver = webdriver.Chrome(r'C:\Users\Rohit\Downloads\chromedriver.exe', options=options)
+driver = webdriver.Chrome(r'chromedriver.exe', options=options)
 
 
 forms_list = [
@@ -355,8 +355,8 @@ for index, form_url in enumerate(forms_list):
     student_name = ""
     date_collected = ""
     if index == 0:
-        wait_for_an_element('username').send_keys('nimmalrt')
-        wait_for_an_element('password').send_keys(decode_password(b'VGNzY3RzbTkh'))
+        wait_for_an_element('username').send_keys('your 6+2 id here')
+        wait_for_an_element('password').send_keys(decode_password(b'your encoded password here'))
         click_an_element(login_button_xpath, By.XPATH)
         print("Sleeping for 20 seconds.")
         sleep(20)
